@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meridian: Demo Trading Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<!-- TradingView Lightweight Charts (needs internet on first load) -->
+<script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body data-view="dashboard">
+<div id="loader" role="status" aria-label="Loading"><span class="spin"></span></div>
+<div class="demo-banner" role="note">Demo mode: all prices are simulated, not live. No real orders are placed and no real accounts are connected.</div>
+<div class="app">
+  <aside id="nav" aria-label="Main navigation">
+    <div class="brand">Meridian <small>demo</small></div>
+    <nav>
+      <a href="#dashboard">Dashboard</a><a href="#markets">Markets</a><a href="#trade">Trade</a>
+      <a href="#portfolio">Portfolio</a><a href="#orders">Orders</a><a href="#watchlist">Watchlist</a>
+      <a href="#history">History</a><a href="#settings">Settings</a>
+    </nav>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button id="menu" aria-label="Open navigation menu">Menu</button>
+      <input id="gsearch" type="search" placeholder="Search assets, e.g. BTC or gold" aria-label="Search assets">
+      <div class="bal" data-tip="Simulated cash balance" tabindex="0">Cash <b id="cashTop"></b></div>
+      <button id="theme" aria-label="Toggle light and dark mode" data-tip="Light / dark">Theme</button>
+      <div class="notif">
+        <button id="bell" aria-label="Notifications" aria-expanded="false">Alerts <i id="badge" hidden></i></button>
+        <div id="nlist" hidden></div>
+      </div>
+      <div class="user" tabindex="0" aria-label="Demo trader profile" data-tip="Demo trader">DT</div>
+    </header>
+
+    <main id="view">
+      <!-- Dashboard + Trade share the terminal layout -->
+      <section data-v="dashboard trade">
+        <div class="stats" id="stats"></div>
+        <div class="grid">
+          <div class="card chart-card">
+            <div class="bar">
+              <div><b id="cSym"></b> <span id="cPx"></span></div>
+              <div class="tools">
+                <div id="tfs" role="group" aria-label="Timeframe"></div>
+                <button data-ctype aria-pressed="false">Line</button>
+                <button data-zoom="0.7" aria-label="Zoom in" data-tip="Zoom in">+</button>
+                <button data-zoom="1.4" aria-label="Zoom out" data-tip="Zoom out">&minus;</button>
+                <button data-zoom="fit" data-tip="Fit all">Fit</button>
+              </div>
+            </div>
+            <div class="cw"><div id="chart"></div><div id="chartLoad" class="ld" hidden><span class="spin"></span></div></div>
+            <p class="mut note">Simulated prices. Scroll or pinch to zoom, drag to pan. Yellow line: 20-period average.</p>
+          </div>
+          <form id="oform" class="card" novalidate aria-labelledby="oh">
+            <h2 id="oh">Trade <span id="oSym"></span></h2>
+            <div class="seg" role="group" aria-label="Side"><button type="button" data-side="buy">Buy</button><button type="button" data-side="sell">Sell</button></div>
+            <div class="seg" role="group" aria-label="Order type"><button type="button" data-type="market">Market</button><button type="button" data-type="limit">Limit</button></div>
+            <label>Quantity<input id="qty" type="number" step="any" min="0" inputmode="decimal" placeholder="0.00"></label>
+            <label>Price (USD)<input id="px" type="number" step="any" min="0" disabled></label>
+            <dl class="sum"><dt>Estimated value</dt><dd id="est"></dd><dt data-tip="Simulated 0.10% fee" tabindex="0">Fee</dt><dd id="fee"></dd><dt>Total</dt><dd id="tot"></dd></dl>
+            <p id="err" class="err" role="alert"></p>
+            <button class="primary buy" id="go">Review buy order</button>
+          </form>
+          <div class="card"><h2>Watchlist</h2><div id="wlMini"></div></div>
+        </div>
+      </section>
+
+      <section data-v="markets">
+        <h1>Markets</h1>
+        <div class="tools wrap"><input id="msearch" type="search" placeholder="Filter by name or symbol" aria-label="Filter markets"><div id="cats" role="group" aria-label="Category"></div></div>
+        <div class="card tw"><table id="mt">
+          <thead><tr><th><button data-sort="sym">Asset</button></th><th><button data-sort="price">Price</button></th><th><button data-sort="chg">24h change</button></th><th><button data-sort="vol">Volume</button></th><th>Status</th><th><span class="sr">Watch</span></th></tr></thead>
+          <tbody></tbody></table></div>
+        <p class="mut note">Demo data. Market status is a simple simulation based on the weekday.</p>
+      </section>
+
+      <section data-v="portfolio">
+        <h1>Portfolio</h1>
+        <div class="tools" id="perf" role="group" aria-label="Period"></div>
+        <div class="two">
+          <div class="card"><h2>Profit and loss history</h2><div id="pnl"></div></div>
+          <div class="card"><h2>Allocation</h2><div id="alloc"></div></div>
+        </div>
+        <div class="card tw"><h2>Holdings</h2><table id="ht"></table></div>
+      </section>
+
+      <section data-v="orders"><h1>Orders</h1><div class="card tw"><table id="ot"></table></div></section>
+      <section data-v="watchlist"><h1>Watchlist</h1><div class="card tw"><table id="wt"></table></div></section>
+      <section data-v="history"><h1>Transaction history</h1><div class="card tw"><table id="hist"></table></div></section>
+
+      <section data-v="settings">
+        <h1>Settings</h1>
+        <div class="card setg">
+          <div><b>Appearance</b><p class="mut">Switch between dark and light mode.</p></div><button data-set="theme">Toggle theme</button>
+          <div><b>Notifications</b><p class="mut">Remove all notifications.</p></div><button data-set="clearn">Clear all</button>
+          <div><b>Demo data</b><p class="mut">Restore $25,000 cash, sample holdings and orders.</p></div><button data-set="reset" class="danger">Reset demo</button>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<dialog id="dlg" aria-modal="true"></dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="script.js"></script>
+</body>
+</html>
